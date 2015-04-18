@@ -36,7 +36,7 @@ class MdModule
 
 
         $file = $root_dir.'/'.$md;
-        $web_file = "/notes/".$md;
+        $web_file = "/$class/".$md;
         $index = false;
 
 
@@ -57,15 +57,19 @@ class MdModule
 
 
         if ($index == false) {
-            $exec = PERLBIN.' '.MD.' '.$file;
+            
 
             if (!file_exists($file)) {
                 die('Source file not found.');
             }
-
-            $output = array();
-            $content = exec($exec, $output);
+            $output = self::processFile($file);
         } else {
+
+            
+            if (file_exists($file.'/README.md')) {
+                header('Location: http://'.WEB_ROOT.PUBLIC_DIR.$web_file.'README.md');
+                exit();
+            }
 
             $output = scandir($md_dir);
 
@@ -93,6 +97,14 @@ class MdModule
         // self::printFooter($web_file, $index);
     }
 
+
+    private static function processFile($file)
+    {
+        $exec = PERLBIN.' '.MD.' '.$file;
+        $output = array();
+        exec($exec, $output);
+        return $output;
+    }
 
 
     public static function printHeader($file)
