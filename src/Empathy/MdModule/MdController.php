@@ -13,6 +13,7 @@ class MdController extends CustomController
         $class = $class_arr[sizeof($class_arr)-1];
         $this->assign('md', MdModule::init($class));
 
+        $this->assign('config', MdModule::getConfig());
 
 
         //return false;

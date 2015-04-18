@@ -12,6 +12,13 @@ define('MD', 'Markdown.pl');
 
 class MdModule
 {
+    private static $config;
+
+
+    public static function getConfig()
+    {
+        return self::$config;
+    }
     
     public static function init($class)
     {
@@ -147,9 +154,13 @@ EOT;
 
     public static function doAuth($md_dir)
     {
-        if (file_exists($md_dir.'/pass.json')) {
+        $config_file = 'config.json';
+        if (file_exists($md_dir.'/'.$config_file)) {
+
             $realm = 'Restricted docs area';
-            $pass_data = json_decode(file_get_contents($md_dir.'/pass.json'), true);
+
+            self::$config = json_decode(file_get_contents($md_dir.'/'.$config_file), true);
+            $pass_data = self::$config['auth'];
             $valid_passwords = array ($pass_data['user'] => $pass_data['password']);
             $valid_users = array_keys($valid_passwords);
             $user = $_SERVER['PHP_AUTH_USER'];
