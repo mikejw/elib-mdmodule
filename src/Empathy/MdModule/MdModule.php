@@ -13,7 +13,7 @@ define('MD', 'Markdown.pl');
 class MdModule
 {
     private static $config;
-
+    private static $class;
 
     public static function getConfig()
     {
@@ -22,9 +22,9 @@ class MdModule
     
     public static function init($class)
     {
-
+        self::$class = $class;
         if (isset($_GET['file']) && $_GET['file'] != '') {
-            $md = substr($_GET['file'], strlen($class)+1);
+            $md = substr($_GET['file'], strlen(self::$class)+1);
         } elseif (isset($_GET['md'])) {
             $md = $_GET['md'];
         } else {
@@ -43,7 +43,7 @@ class MdModule
 
 
         $file = $root_dir.'/'.$md;
-        $web_file = "/$class/".$md;
+        $web_file = '/'.self::$class.'/'.$md;
         $index = false;
 
 
@@ -160,17 +160,25 @@ EOT;
             $realm = 'Restricted docs area';
 
             self::$config = json_decode(file_get_contents($md_dir.'/'.$config_file), true);
-            $pass_data = self::$config['auth'];
-            $valid_passwords = array ($pass_data['user'] => $pass_data['password']);
-            $valid_users = array_keys($valid_passwords);
-            $user = $_SERVER['PHP_AUTH_USER'];
-            $pass = $_SERVER['PHP_AUTH_PW'];
-            $validated = (in_array($user, $valid_users)) && ($pass == $valid_passwords[$user]);
-            if (!$validated) {
-              header('WWW-Authenticate: Basic realm="'.$realm.'"');
-              header('HTTP/1.0 401 Unauthorized');
-              die ("Not authorized");
-            }    
+
+            if (isset(self::$config['redirect'])) {
+                $loc = 'http://'.WEB_ROOT.PUBLIC_DIR.'/'.self::$class.'/'.self::$config['redirect'];
+                header('Location: '.$loc);                
+                exit();
+            }
+            elseif (isset(self::$config['auth'])) {
+                $pass_data = self::$config['auth'];
+                $valid_passwords = array ($pass_data['user'] => $pass_data['password']);
+                $valid_users = array_keys($valid_passwords);
+                $user = $_SERVER['PHP_AUTH_USER'];
+                $pass = $_SERVER['PHP_AUTH_PW'];
+                $validated = (in_array($user, $valid_users)) && ($pass == $valid_passwords[$user]);
+                if (!$validated) {
+                  header('WWW-Authenticate: Basic realm="'.$realm.'"');
+                  header('HTTP/1.0 401 Unauthorized');
+                  die ("Not authorized");
+                }
+            }
         }
     }
    
