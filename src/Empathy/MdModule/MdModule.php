@@ -80,11 +80,7 @@ class MdModule
             exit();
         }
 
-
         return implode("\n", $output);
-        // self::printHeader($file);
-        // echo implode("\n", $output);
-        // self::printFooter($web_file, $index);
     }
 
 
@@ -110,44 +106,6 @@ class MdModule
         return $output;
     }
 
-
-    public static function printHeader($file)
-    {
-        echo <<<EOT
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8" />
-<title>$file</title>
-<link rel="stylesheet" href="/notes/md.css" type="text/css" media="all" />
-<meta name="viewport" content="initial-scale=1.0, width=device-width" />
-</head>
-<body>
-<div id="page">
-<img width=290 src="https://pbs.twimg.com/profile_images/1776294323/new_logo_glow_noise_b.jpg" alt="" />
-<p>&nbsp;</p>
-EOT;
-    }
-
-    public static function printFooter($md, $index)
-    {
-        if ($index) {
-        $foot = <<<EOT
-<p id="top"><a href="#">#top</a></p>
-</div>
-</body>
-</html>
-EOT;
-    } else {
-    $foot = <<<EOT
-<p id="top"><a href="$md?raw=true">View source</a> - <a href="#">#top</a></p>
-</div>
-</body>
-</html>
-EOT;
-        }
-        echo $foot;
-    }
 
     public static function doAuth($md_dir)
     {
@@ -178,5 +136,4 @@ EOT;
             }
         }
     }
-   
 }
