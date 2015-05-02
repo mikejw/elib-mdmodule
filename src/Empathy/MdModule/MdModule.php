@@ -2,11 +2,8 @@
 
 namespace Empathy\MdModule;
 
-//define('PERLBIN', '/opt/local/bin/perl');
-//define('MD', '/opt/local/bin/Markdown.pl');
-
-define('PERLBIN', '');
-define('MD', 'Markdown.pl');
+define('PERLBIN', '/opt/local/bin/perl');
+define('MD', '/opt/local/bin/Markdown.pl');
 
 
 
@@ -14,6 +11,8 @@ class MdModule
 {
     private static $config;
     private static $class;
+    private static $web_file;
+    private static $index;
 
     public static function getConfig()
     {
@@ -29,22 +28,12 @@ class MdModule
             $md = $_GET['md'];
         } else {
             $md = 'README.md';
-            //$md = 'README_BIZ.md';
-            //$md = 'README_BIZ.md';
-            //$md = 'fixtures.md';
-            //$md = 'mba/MBA_REVIEW.md';
-
         }
-
         $root_dir = DOC_ROOT.'/md';
-        //$root_dir = '/var/www/passports-lost-stolen';
-        //$root_dir = '/var/www/bullpup';
-        //$readme = 'building.md';
-
-
+     
         $file = $root_dir.'/'.$md;
-        $web_file = '/'.self::$class.'/'.$md;
-        $index = false;
+        self::$web_file = '/'.self::$class.'/'.$md;
+        self::$index = false;
 
 
         # auth stuff
@@ -52,29 +41,22 @@ class MdModule
             $md_dir = dirname(realpath($file));
         } else {
             $md_dir = $file;
-            $index = true;
+            self::$index = true;
         }
 
-        //echo $file;
-
         self::doAuth($md_dir);
+        $exec = PERLBIN.' '.MD.' '.$file;
+        
 
-        //$exec = PERLBIN.' '.MD.' '.$file;
-        $exec = 'markdown '.$file;
-
-
-        if ($index == false) {
-            
-
+        if (self::$index == false) {
             if (!file_exists($file)) {
                 die('Source file not found.');
             }
             $output = self::processFile($file);
         } else {
 
-            
             if (file_exists($file.'/README.md')) {
-                header('Location: http://'.WEB_ROOT.PUBLIC_DIR.$web_file.'README.md');
+                header('Location: http://'.WEB_ROOT.PUBLIC_DIR.self::$web_file.'README.md');
                 exit();
             }
 
@@ -98,10 +80,24 @@ class MdModule
             exit();
         }
 
+
         return implode("\n", $output);
         // self::printHeader($file);
         // echo implode("\n", $output);
         // self::printFooter($web_file, $index);
+    }
+
+
+    public static function getIndex()
+    {
+        return self::$index;
+    }
+
+
+
+    public static function getWebFile()
+    {
+        return self::$web_file;
     }
 
 
@@ -110,6 +106,7 @@ class MdModule
         $exec = PERLBIN.' '.MD.' '.$file;
         $output = array();
         exec($exec, $output);
+
         return $output;
     }
 
