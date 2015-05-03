@@ -13,6 +13,7 @@ class MdModule
     private static $class;
     private static $web_file;
     private static $index;
+    private static $file;
 
     public static function getConfig()
     {
@@ -31,31 +32,31 @@ class MdModule
         }
         $root_dir = DOC_ROOT.'/md';
      
-        $file = $root_dir.'/'.$md;
+        self::$file = $root_dir.'/'.$md;
         self::$web_file = '/'.self::$class.'/'.$md;
         self::$index = false;
 
 
         # auth stuff
-        if (!is_dir($file)) {
-            $md_dir = dirname(realpath($file));
+        if (!is_dir(self::$file)) {
+            $md_dir = dirname(realpath(self::$file));
         } else {
-            $md_dir = $file;
+            $md_dir = self::$file;
             self::$index = true;
         }
 
         self::doAuth($md_dir);
-        $exec = PERLBIN.' '.MD.' '.$file;
+        $exec = PERLBIN.' '.MD.' '.self::$file;
         
 
         if (self::$index == false) {
-            if (!file_exists($file)) {
+            if (!file_exists(self::$file)) {
                 die('Source file not found.');
             }
-            $output = self::processFile($file);
+            $output = self::processFile(self::$file);
         } else {
 
-            if (file_exists($file.'/README.md')) {
+            if (file_exists(self::$file.'/README.md')) {
                 header('Location: http://'.WEB_ROOT.PUBLIC_DIR.self::$web_file.'README.md');
                 exit();
             }
@@ -76,7 +77,7 @@ class MdModule
 
         if (isset($_GET['raw']) && $_GET['raw'] == 'true') { 
             header('Content-type: text/plain');
-            echo file_get_contents($file);
+            echo file_get_contents(self::$file);
             exit();
         }
 
@@ -94,6 +95,12 @@ class MdModule
     public static function getWebFile()
     {
         return self::$web_file;
+    }
+
+
+    public static function getFile()
+    {
+        return self::$file;
     }
 
 

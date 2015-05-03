@@ -18,6 +18,7 @@ class MdController extends CustomController
         $this->assign('config', MdModule::getConfig());
         $this->assign('web_file', MdModule::getWebFile());
         $this->assign('index', MdModule::getIndex());
+        $this->assign('file', MdModule::getFile());
 
     }
 }
