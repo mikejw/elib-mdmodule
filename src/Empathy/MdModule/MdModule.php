@@ -9,6 +9,7 @@ define('MD', '/opt/local/bin/Markdown.pl');
 
 class MdModule
 {
+    private static $md;
     private static $config;
     private static $class;
     private static $web_file;
@@ -22,20 +23,21 @@ class MdModule
     
     public static function init($class)
     {
+        self::$config = array();
         self::$class = $class;
         if (isset($_GET['file']) && $_GET['file'] != '') {
-            $md = substr($_GET['file'], strlen(self::$class)+1);
+            self::$md = substr($_GET['file'], strlen(self::$class)+1);
         } elseif (isset($_GET['md'])) {
-            $md = $_GET['md'];
+            self::$md = $_GET['md'];
         } else {
-            $md = 'README.md';
+            self::$md = 'README.md';
         }
         $root_dir = DOC_ROOT.'/md';
      
-        self::$file = $root_dir.'/'.$md;
-        self::$web_file = '/'.self::$class.'/'.$md;
+        self::$file = $root_dir.'/'.self::$md;
+        self::$web_file = '/'.self::$class.'/'.self::$md;
         self::$index = false;
-
+      
 
         # auth stuff
         if (!is_dir(self::$file)) {
@@ -44,6 +46,10 @@ class MdModule
             $md_dir = self::$file;
             self::$index = true;
         }
+
+        self::loadConfig($md_dir);
+
+        self::doRedirect();
 
         self::doAuth($md_dir);
         $exec = PERLBIN.' '.MD.' '.self::$file;
@@ -85,6 +91,12 @@ class MdModule
     }
 
 
+    public static function getMd()
+    {
+        return self::$md;
+    }
+
+
     public static function getIndex()
     {
         return self::$index;
@@ -114,32 +126,49 @@ class MdModule
     }
 
 
-    public static function doAuth($md_dir)
+    private static function doRedirect()
+    {
+        if (isset(self::$config['redirect'])) {
+            $loc = 'http://'.WEB_ROOT.PUBLIC_DIR.'/'.self::$class.'/'.self::$config['redirect'];
+            header('Location: '.$loc);
+            exit();
+        }
+    }
+
+
+    public static function getContents()
+    {
+        if (!isset(self::$config['contents'])) {
+            throw new \Exception('No contents defined.');
+        }
+
+
+        return self::$config['contents'];
+    }
+
+
+    private static function loadConfig($md_dir)
     {
         $config_file = 'config.json';
         if (file_exists($md_dir.'/'.$config_file)) {
-
-            $realm = 'Restricted docs area';
-
             self::$config = json_decode(file_get_contents($md_dir.'/'.$config_file), true);
+        }
+    }
 
-            if (isset(self::$config['redirect'])) {
-                $loc = 'http://'.WEB_ROOT.PUBLIC_DIR.'/'.self::$class.'/'.self::$config['redirect'];
-                header('Location: '.$loc);                
-                exit();
-            }
-            elseif (isset(self::$config['auth'])) {
-                $pass_data = self::$config['auth'];
-                $valid_passwords = array ($pass_data['user'] => $pass_data['password']);
-                $valid_users = array_keys($valid_passwords);
-                $user = $_SERVER['PHP_AUTH_USER'];
-                $pass = $_SERVER['PHP_AUTH_PW'];
-                $validated = (in_array($user, $valid_users)) && ($pass == $valid_passwords[$user]);
-                if (!$validated) {
-                  header('WWW-Authenticate: Basic realm="'.$realm.'"');
-                  header('HTTP/1.0 401 Unauthorized');
-                  die ("Not authorized");
-                }
+    public static function doAuth($md_dir)
+    {
+        $realm = 'Restricted docs area';
+        if (isset(self::$config['auth'])) {
+            $pass_data = self::$config['auth'];
+            $valid_passwords = array ($pass_data['user'] => $pass_data['password']);
+            $valid_users = array_keys($valid_passwords);
+            $user = $_SERVER['PHP_AUTH_USER'];
+            $pass = $_SERVER['PHP_AUTH_PW'];
+            $validated = (in_array($user, $valid_users)) && ($pass == $valid_passwords[$user]);
+            if (!$validated) {
+              header('WWW-Authenticate: Basic realm="'.$realm.'"');
+              header('HTTP/1.0 401 Unauthorized');
+              die ("Not authorized");
             }
         }
     }

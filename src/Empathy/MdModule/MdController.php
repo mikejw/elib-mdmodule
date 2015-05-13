@@ -16,9 +16,23 @@ class MdController extends CustomController
 
         $this->assign('md', MdModule::init($class));
         $this->assign('config', MdModule::getConfig());
-        $this->assign('web_file', MdModule::getWebFile());
+
+        $web_file = MdModule::getWebFile();
+
+        $this->assign('web_file', $web_file);
         $this->assign('index', MdModule::getIndex());
         $this->assign('file', MdModule::getFile());
 
+        try {
+            $this->assign('contents', MdModule::getContents());
+        } catch(\Exception $e) {
+            //
+        }
+
+        $web_base_arr = explode('/', preg_replace('/^(\/)/', '', $web_file));
+        $file = array_pop($web_base_arr);
+        $this->assign('web_base', implode('/', $web_base_arr));;
+        $this->assign('md_file', $file);
     }
 }
+
