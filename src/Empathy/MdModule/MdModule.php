@@ -158,13 +158,19 @@ class MdModule
     public static function doAuth($md_dir)
     {
         $realm = 'Restricted docs area';
+        $validated = false;
+
         if (isset(self::$config['auth'])) {
-            $pass_data = self::$config['auth'];
-            $valid_passwords = array ($pass_data['user'] => $pass_data['password']);
-            $valid_users = array_keys($valid_passwords);
-            $user = $_SERVER['PHP_AUTH_USER'];
-            $pass = $_SERVER['PHP_AUTH_PW'];
-            $validated = (in_array($user, $valid_users)) && ($pass == $valid_passwords[$user]);
+
+            if (isset($_SERVER['PHP_AUTH_USER'])) {
+
+                $pass_data = self::$config['auth'];
+                $valid_passwords = array ($pass_data['user'] => $pass_data['password']);
+                $valid_users = array_keys($valid_passwords);
+                $user = $_SERVER['PHP_AUTH_USER'];
+                $pass = $_SERVER['PHP_AUTH_PW'];
+                $validated = (in_array($user, $valid_users)) && ($pass == $valid_passwords[$user]);
+            }
             if (!$validated) {
               header('WWW-Authenticate: Basic realm="'.$realm.'"');
               header('HTTP/1.0 401 Unauthorized');
