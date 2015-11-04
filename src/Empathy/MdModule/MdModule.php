@@ -22,12 +22,6 @@ class MdModule
     }
 
 
-    public static function isSecure() {
-        return
-        ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-            || $_SERVER['SERVER_PORT'] == 443);
-    }
-
     public static function init($class)
     {
         self::$config = array();
@@ -69,11 +63,8 @@ class MdModule
             $output = self::processFile(self::$file);
         } else {
 
-	    $proto = 'http';
-	    if (self::isSecure()) {
-	        $proto = 'https';
-            }
-	    
+            $proto = (\Empathy\MVC\Util\Misc::isSecure())? 'https': 'http';
+
             if (file_exists(self::$file.'/README.md')) {
                 header('Location: '.$proto.'://'.WEB_ROOT.PUBLIC_DIR.self::$web_file.'README.md');
                 exit();
@@ -140,11 +131,8 @@ class MdModule
 
     private static function doRedirect()
     {
-    	$proto = 'http';
-	if (self::isSecure()) {
-	    $proto = 'https';
-        }
-
+        $proto = (\Empathy\MVC\Util\Misc::isSecure())? 'https': 'http';
+        
         if (isset(self::$config['redirect'])) {
             $loc = $proto.'://'.WEB_ROOT.PUBLIC_DIR.'/'.self::$class.'/'.self::$config['redirect'];
             header('Location: '.$loc);
