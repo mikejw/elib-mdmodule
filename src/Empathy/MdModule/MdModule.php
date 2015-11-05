@@ -2,10 +2,7 @@
 
 namespace Empathy\MdModule;
 
-define('PERLBIN', '/usr/bin/perl');
-define('MD', '/usr/bin/markdown');
-
-
+use \Michelf\Markdown;
 
 class MdModule
 {
@@ -53,8 +50,6 @@ class MdModule
         self::doRedirect();
 
         self::doAuth($md_dir);
-        $exec = PERLBIN.' '.MD.' '.self::$file;
-        
 
         if (self::$index == false) {
             if (!file_exists(self::$file)) {
@@ -81,6 +76,7 @@ class MdModule
                     $output[$index] = $link;
                 }
             }
+            $output = implode("\n", $output);
 
         }
 
@@ -90,7 +86,7 @@ class MdModule
             exit();
         }
 
-        return implode("\n", $output);
+        return $output;
     }
 
 
@@ -121,11 +117,7 @@ class MdModule
 
     private static function processFile($file)
     {
-        $exec = PERLBIN.' '.MD.' '.$file;
-        $output = array();
-        exec($exec, $output);
-
-        return $output;
+        return Markdown::defaultTransform(file_get_contents($file));
     }
 
 
