@@ -14,7 +14,7 @@
         }
     ],
     "require": {
-        "mikejw/elib-base": "0.9.4",
+        "mikejw/elib-base": "dev-develop",
 	"michelf/php-markdown": "1.5.0"
     },
     "autoload": {
