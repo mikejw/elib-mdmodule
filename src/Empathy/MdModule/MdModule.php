@@ -2,7 +2,8 @@
 
 namespace Empathy\MdModule;
 
-use \Michelf\Markdown;
+use Michelf\Markdown;
+use Empathy\MVC\Config;
 
 class MdModule
 {
@@ -30,7 +31,7 @@ class MdModule
         } else {
             self::$md = 'README.md';
         }
-        $root_dir = DOC_ROOT.'/md';
+        $root_dir = Config::get('DOC_ROOT').'/md';
      
         self::$file = $root_dir.'/'.self::$md;
         self::$web_file = '/'.self::$class.'/'.self::$md;
@@ -61,7 +62,7 @@ class MdModule
             $proto = (\Empathy\MVC\Util\Misc::isSecure())? 'https': 'http';
 
             if (file_exists(self::$file.'/README.md')) {
-                header('Location: '.$proto.'://'.WEB_ROOT.PUBLIC_DIR.self::$web_file.'README.md');
+                header('Location: '.$proto.'://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').self::$web_file.'README.md');
                 exit();
             }
 
@@ -126,7 +127,7 @@ class MdModule
         $proto = (\Empathy\MVC\Util\Misc::isSecure())? 'https': 'http';
         
         if (isset(self::$config['redirect'])) {
-            $loc = $proto.'://'.WEB_ROOT.PUBLIC_DIR.'/'.self::$class.'/'.self::$config['redirect'];
+            $loc = $proto.'://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/'.self::$class.'/'.self::$config['redirect'];
             header('Location: '.$loc);
             exit();
         }
