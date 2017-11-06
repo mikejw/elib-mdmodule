@@ -14,6 +14,7 @@ class MdModule
     private static $index;
     private static $file;
     private static $adoc_mode = false;
+    private static $comments = false;
 
     public static function getConfig()
     {
@@ -24,6 +25,8 @@ class MdModule
     public static function init($class)
     {
         self::$adoc_mode = (defined('ELIB_MD_ADOC_MODE') && ELIB_MD_ADOC_MODE);
+        self::$comments = (defined('ELIB_MD_COMMENTS') && ELIB_MD_COMMENTS);
+
         $ext = !self::$adoc_mode ? 'md' : 'adoc';
 
         self::$config = array();
@@ -189,5 +192,10 @@ class MdModule
     public static function getAdocMode()
     {
         return self::$adoc_mode;
+    }
+
+    public static function getComments()
+    {
+        return self::$comments;
     }
 }
