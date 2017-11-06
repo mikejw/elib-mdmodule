@@ -13,6 +13,7 @@ class MdModule
     private static $web_file;
     private static $index;
     private static $file;
+    private static $adoc_mode = false;
 
     public static function getConfig()
     {
@@ -22,21 +23,25 @@ class MdModule
 
     public static function init($class)
     {
+        self::$adoc_mode = (defined('ELIB_MD_ADOC_MODE') && ELIB_MD_ADOC_MODE);
+        $ext = !self::$adoc_mode ? 'md' : 'adoc';
+
         self::$config = array();
         self::$class = $class;
         if (isset($_GET['file']) && $_GET['file'] != '') {
-            self::$md = substr($_GET['file'], strlen(self::$class)+1);
+            self::$md = substr($_GET['file'], strlen(self::$class) + 1);
         } elseif (isset($_GET['md'])) {
             self::$md = $_GET['md'];
         } else {
-            self::$md = 'README.md';
+            self::$md = "README.$ext";
         }
-        $root_dir = Config::get('DOC_ROOT').'/md';
-     
-        self::$file = $root_dir.'/'.self::$md;
-        self::$web_file = '/'.self::$class.'/'.self::$md;
+
+        $root_dir = Config::get('DOC_ROOT') . "/$ext";
+
+        self::$file = $root_dir . '/' . self::$md;
+        self::$web_file = '/' . self::$class . '/' . self::$md;
         self::$index = false;
-      
+
 
         # auth stuff
         if (!is_dir(self::$file)) {
@@ -56,24 +61,25 @@ class MdModule
             if (!file_exists(self::$file)) {
                 die('Source file not found.');
             }
-            $output = self::processFile(self::$file);
+
+            $output = self::processFile(self::$file, self::$adoc_mode);
         } else {
 
-            $proto = (\Empathy\MVC\Util\Misc::isSecure())? 'https': 'http';
+            $proto = (\Empathy\MVC\Util\Misc::isSecure()) ? 'https' : 'http';
 
-            if (file_exists(self::$file.'/README.md')) {
-                header('Location: '.$proto.'://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').self::$web_file.'README.md');
+            if (file_exists(self::$file . "/README.$ext")) {
+                header('Location: ' . $proto . '://' . Config::get('WEB_ROOT') . Config::get('PUBLIC_DIR') . self::$web_file . "README.$ext");
                 exit();
             }
 
             $output = scandir($md_dir);
 
             foreach ($output as $index => $value) {
-                if (strpos($value, '.md') == false) {
+                if (strpos($value, ".$ext") == false) {
                     unset($output[$index]);
                 } else {
                     $link = $output[$index];
-                    $link = '<p><a href="./'.$link.'">'.$link.'</a></p>';
+                    $link = '<p><a href="./' . $link . '">' . $link . '</a></p>';
                     $output[$index] = $link;
                 }
             }
@@ -81,7 +87,7 @@ class MdModule
 
         }
 
-        if (isset($_GET['raw']) && $_GET['raw'] == 'true') { 
+        if (isset($_GET['raw']) && $_GET['raw'] == 'true') {
             header('Content-type: text/plain');
             echo file_get_contents(self::$file);
             exit();
@@ -103,7 +109,6 @@ class MdModule
     }
 
 
-
     public static function getWebFile()
     {
         return self::$web_file;
@@ -116,19 +121,23 @@ class MdModule
     }
 
 
-    private static function processFile($file)
+    private static function processFile($file, $adoc_mode)
     {
-        return Markdown::defaultTransform(file_get_contents($file));
+        if ($adoc_mode) {
+            return file_get_contents($file);
+        } else {
+            return Markdown::defaultTransform(file_get_contents($file));
+        }
     }
 
 
     private static function doRedirect()
     {
-        $proto = (\Empathy\MVC\Util\Misc::isSecure())? 'https': 'http';
-        
+        $proto = (\Empathy\MVC\Util\Misc::isSecure()) ? 'https' : 'http';
+
         if (isset(self::$config['redirect'])) {
-            $loc = $proto.'://'.Config::get('WEB_ROOT').Config::get('PUBLIC_DIR').'/'.self::$class.'/'.self::$config['redirect'];
-            header('Location: '.$loc);
+            $loc = $proto . '://' . Config::get('WEB_ROOT') . Config::get('PUBLIC_DIR') . '/' . self::$class . '/' . self::$config['redirect'];
+            header('Location: ' . $loc);
             exit();
         }
     }
@@ -148,8 +157,8 @@ class MdModule
     private static function loadConfig($md_dir)
     {
         $config_file = 'config.json';
-        if (file_exists($md_dir.'/'.$config_file)) {
-            self::$config = json_decode(file_get_contents($md_dir.'/'.$config_file), true);
+        if (file_exists($md_dir . '/' . $config_file)) {
+            self::$config = json_decode(file_get_contents($md_dir . '/' . $config_file), true);
         }
     }
 
@@ -163,17 +172,22 @@ class MdModule
             if (isset($_SERVER['PHP_AUTH_USER'])) {
 
                 $pass_data = self::$config['auth'];
-                $valid_passwords = array ($pass_data['user'] => $pass_data['password']);
+                $valid_passwords = array($pass_data['user'] => $pass_data['password']);
                 $valid_users = array_keys($valid_passwords);
                 $user = $_SERVER['PHP_AUTH_USER'];
                 $pass = $_SERVER['PHP_AUTH_PW'];
                 $validated = (in_array($user, $valid_users)) && ($pass == $valid_passwords[$user]);
             }
             if (!$validated) {
-              header('WWW-Authenticate: Basic realm="'.$realm.'"');
-              header('HTTP/1.0 401 Unauthorized');
-              die ("Not authorized");
+                header('WWW-Authenticate: Basic realm="' . $realm . '"');
+                header('HTTP/1.0 401 Unauthorized');
+                die ("Not authorized");
             }
         }
+    }
+
+    public static function getAdocMode()
+    {
+        return self::$adoc_mode;
     }
 }

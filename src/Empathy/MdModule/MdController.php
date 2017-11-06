@@ -29,6 +29,8 @@ class MdController extends CustomController
             //
         }
 
+        $this->assign('adoc_mode', MdModule::getAdocMode());
+
         $web_base_arr = explode('/', preg_replace('/^(\/)/', '', $web_file));
         $file = array_pop($web_base_arr);
         $this->assign('web_base', implode('/', $web_base_arr));;
