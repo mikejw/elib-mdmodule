@@ -29,6 +29,10 @@ class MdController extends CustomController
             //
         }
 
+        $this->assign('adoc_mode', MdModule::getAdocMode());
+
+        $this->assign('comments_enabled', MdModule::getComments());
+
         $web_base_arr = explode('/', preg_replace('/^(\/)/', '', $web_file));
         $file = array_pop($web_base_arr);
         $this->assign('web_base', implode('/', $web_base_arr));;
