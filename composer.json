@@ -1,12 +1,12 @@
 {
     "name": "mikejw/elib-mdmodule",
     "type": "library",
-    "description": "Allocate a module for mardown file browsing",
+    "description": "Allocate a module for markdown file browsing",
     "keywords": [
         "library"
     ],
     "homepage": "http://empathyphp.co.uk",
-    "license": "GPL3",
+    "license": "MIT",
     "authors": [
         {
             "name": "Mike Whiting",
