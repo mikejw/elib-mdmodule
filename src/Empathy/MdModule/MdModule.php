@@ -16,6 +16,7 @@ class MdModule
     private static $file;
     private static $adoc_mode = false;
     private static $comments = false;
+    private static $md_dir;
 
     private static $package = '';
 
@@ -57,11 +58,17 @@ class MdModule
             self::$index = true;
         }
 
-        self::loadConfig($md_dir);
+        if (preg_match('/\/$/', $md_dir)) {
+            $md_dir = substr($md_dir, 0, -1);
+        }
+
+        self::$md_dir = $md_dir;
+
+        self::loadConfig(self::$md_dir);
 
         self::doRedirect();
 
-        self::doAuth($md_dir);
+        self::doAuth(self::$md_dir);
 
         if (self::$index == false) {
             if (!file_exists(self::$file)) {
@@ -78,7 +85,7 @@ class MdModule
                 exit();
             }
 
-            $output = scandir($md_dir);
+            $output = scandir(self::$md_dir);
 
             foreach ($output as $index => $value) {
                 if (strpos($value, ".$ext") == false) {
@@ -119,6 +126,7 @@ class MdModule
                 : false;
         if ($log !== false) {
             $log->debug(json_encode([
+                'md_dir' => self::$md_dir,
                 'md' => self::$md,
                 'config' => self::$config,
                 'class' => self::$class,
@@ -183,7 +191,6 @@ class MdModule
         if (!isset(self::$config['contents'])) {
             throw new \Exception('No contents defined.');
         }
-
 
         return self::$config['contents'];
     }
