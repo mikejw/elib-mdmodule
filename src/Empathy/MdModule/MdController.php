@@ -33,6 +33,8 @@ class MdController extends CustomController
 
         $this->assign('comments_enabled', MdModule::getComments());
 
+        $this->assign('package', MdModule::getPackage());
+
         $web_base_arr = explode('/', preg_replace('/^(\/)/', '', $web_file));
         $file = array_pop($web_base_arr);
         $this->assign('web_base', implode('/', $web_base_arr));;

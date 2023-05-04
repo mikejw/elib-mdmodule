@@ -4,6 +4,7 @@ namespace Empathy\MdModule;
 
 use Michelf\Markdown;
 use Empathy\MVC\Config;
+use Empathy\MVC\DI;
 
 class MdModule
 {
@@ -15,6 +16,8 @@ class MdModule
     private static $file;
     private static $adoc_mode = false;
     private static $comments = false;
+
+    private static $package = '';
 
     public static function getConfig()
     {
@@ -96,9 +99,38 @@ class MdModule
             exit();
         }
 
+        if (preg_match('/\//', self::$md)) {
+            $packageArr = explode('/', self::$md);
+            if (is_array($packageArr) && count($packageArr)) {
+                self::$package = $packageArr[sizeof($packageArr) - 2];
+            }
+        }
+
+        self::debugLog();
+
         return $output;
     }
 
+    public static function debugLog()
+    {
+        $log =
+            DI::getContainer()->get('LoggingOn')
+                ? DI::getContainer()->get('Log')
+                : false;
+        if ($log !== false) {
+            $log->debug(json_encode([
+                'md' => self::$md,
+                'config' => self::$config,
+                'class' => self::$class,
+                'web_file' => self::$web_file,
+                'index' => self::$index,
+                'file' => self::$file,
+                'adoc_mode' => self::$adoc_mode,
+                'comments' => self::$comments,
+                'package' => self::$package
+            ]));
+        }
+    }
 
     public static function getMd()
     {
@@ -159,9 +191,9 @@ class MdModule
 
     private static function loadConfig($md_dir)
     {
-        $config_file = 'config.json';
-        if (file_exists($md_dir . '/' . $config_file)) {
-            self::$config = json_decode(file_get_contents($md_dir . '/' . $config_file), true);
+        $config_file = $md_dir .'/config.json';
+        if (file_exists($config_file)) {
+            self::$config = json_decode(file_get_contents($config_file), true);
         }
     }
 
@@ -197,5 +229,10 @@ class MdModule
     public static function getComments()
     {
         return self::$comments;
+    }
+
+    public static function getPackage()
+    {
+        return self::$package;
     }
 }
