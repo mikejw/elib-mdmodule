@@ -5,6 +5,7 @@ namespace Empathy\MdModule;
 use Michelf\Markdown;
 use Empathy\MVC\Config;
 use Empathy\MVC\DI;
+use Empathy\MVC\RequestException;
 
 class MdModule
 {
@@ -72,7 +73,7 @@ class MdModule
 
         if (self::$index == false) {
             if (!file_exists(self::$file)) {
-                die('Source file not found.');
+                throw new RequestException('Not found', RequestException::NOT_FOUND);
             }
 
             $output = self::processFile(self::$file, self::$adoc_mode);
