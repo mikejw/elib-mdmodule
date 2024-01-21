@@ -63,7 +63,7 @@ class MdModule
         }
 
         self::$md_dir = $md_dir;
-        
+
         self::loadConfig(self::$md_dir);
 
         self::doRedirect();
@@ -198,7 +198,6 @@ class MdModule
 
     private static function loadConfig($md_dir)
     {
-        $origMDDir = $md_dir;
         $docsPrefix = '';
         $key = -1;
         $dirArr = explode('/', $md_dir);
