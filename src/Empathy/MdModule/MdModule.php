@@ -50,7 +50,6 @@ class MdModule
         self::$web_file = '/' . self::$class . '/' . self::$md;
         self::$index = false;
 
-
         # auth stuff
         if (!is_dir(self::$file)) {
             $md_dir = dirname(realpath(self::$file));
@@ -64,7 +63,7 @@ class MdModule
         }
 
         self::$md_dir = $md_dir;
-
+        
         self::loadConfig(self::$md_dir);
 
         self::doRedirect();
@@ -110,7 +109,7 @@ class MdModule
         if (preg_match('/\//', self::$md)) {
             $packageArr = explode('/', self::$md);
             if (is_array($packageArr) && count($packageArr)) {
-                self::$package = $packageArr[sizeof($packageArr) - 2];
+                self::$package = $packageArr[0];
             }
         }
 
@@ -199,7 +198,22 @@ class MdModule
 
     private static function loadConfig($md_dir)
     {
-        $config_file = $md_dir .'/config.json';
+        $origMDDir = $md_dir;
+        $docsPrefix = '';
+        $key = -1;
+        $dirArr = explode('/', $md_dir);
+        if ($dirArr[sizeof($dirArr) - 1] !== 'md') {
+            $key = array_search('docs', $dirArr);
+            if ($dirArr[sizeof($dirArr) - 1] == 'docs') {
+                array_pop($dirArr);
+                $docsPrefix = '/docs';
+            } elseif (!$key) {
+                $docsPrefix = '/docs';
+            }
+        }
+        $md_dir = implode('/', $dirArr) . $docsPrefix;
+        $config_file = $md_dir . '/config.json';
+
         if (file_exists($config_file)) {
             self::$config = json_decode(file_get_contents($config_file), true);
         }

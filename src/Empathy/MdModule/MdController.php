@@ -10,7 +10,8 @@ class MdController extends CustomController
 
 
     public function default_event()
-    {        
+    {
+        $contents = array();
         $class_arr = explode('\\', get_class($this));
         $class = $class_arr[sizeof($class_arr)-1];
 
@@ -24,7 +25,7 @@ class MdController extends CustomController
         $this->assign('file', MdModule::getFile());
 
         try {
-            $this->assign('contents', MdModule::getContents());
+            $contents = MdModule::getContents();
         } catch(\Exception $e) {
             //
         }
@@ -36,9 +37,23 @@ class MdController extends CustomController
         $this->assign('package', MdModule::getPackage());
 
         $web_base_arr = explode('/', preg_replace('/^(\/)/', '', $web_file));
+        $web_base_arr = array_filter($web_base_arr, function($v, $k) use ($web_base_arr) {
+           return (
+             (
+                 $web_base_arr[sizeof($web_base_arr) - 2] !== 'docs' ||
+                 (($k === 0 || $v !== 'docs') &&
+                 !($v === 'docs' && isset($web_bar_arr[$k + 1]) && $web_base_arr[$k + 1] === 'docs'))
+             )
+           );
+        }, ARRAY_FILTER_USE_BOTH);
         $file = array_pop($web_base_arr);
         $this->assign('web_base', implode('/', $web_base_arr));;
         $this->assign('md_file', $file);
+
+        foreach ($contents as &$item) {
+            $item['active'] = strpos($item['file'], $file) !== false;
+        }
+        $this->assign('contents', $contents);
     }
 }
 
