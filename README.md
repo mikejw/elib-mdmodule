@@ -6,7 +6,7 @@ Asciidoctor.js
 Licence
 ---
 Empathy and officially released extension libraries are now distributed under an
-MIT license.  See [LICENSE.txt](./LICENSE.txt).
+MIT license.  See [LICENSE](./LICENSE).
 
 
 Follow this guide for building asciidoc.js
