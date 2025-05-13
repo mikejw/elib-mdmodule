@@ -77,11 +77,11 @@ class MdModule
 
             $output = self::processFile(self::$file, self::$adoc_mode);
         } else {
-
             $proto = (\Empathy\MVC\Util\Misc::isSecure()) ? 'https' : 'http';
+            $web_file = rtrim(self::$web_file, '/') . '/';
 
             if (file_exists(self::$file . "/README.$ext")) {
-                header('Location: ' . $proto . '://' . Config::get('WEB_ROOT') . Config::get('PUBLIC_DIR') . self::$web_file . "README.$ext");
+                header('Location: ' . $proto . '://' . Config::get('WEB_ROOT') . Config::get('PUBLIC_DIR') . $web_file . "README.$ext");
                 exit();
             }
 
@@ -97,7 +97,6 @@ class MdModule
                 }
             }
             $output = implode("\n", $output);
-
         }
 
         if (isset($_GET['raw']) && $_GET['raw'] == 'true') {
