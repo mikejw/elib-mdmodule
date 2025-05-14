@@ -168,8 +168,17 @@ class MdModule
         if ($adoc_mode) {
             return file_get_contents($file);
         } else {
-            return Markdown::defaultTransform(file_get_contents($file));
+            if (DI::getContainer()->get('CacheEnabled')) {
+                return DI::getContainer()->get('Cache')->cachedCallback('markdown_' . $file, [self::class, 'transform'], [$file]);
+            } else {
+                return self::transform($file);
+            }
         }
+    }
+
+    public static function transform($file)
+    {
+        return Markdown::defaultTransform(file_get_contents($file));
     }
 
 
