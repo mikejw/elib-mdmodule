@@ -6,8 +6,9 @@ use Empathy\MVC\Controller\CustomController;
 
 class MdController extends CustomController
 {
-
-
+    protected $module;
+    protected $package;
+    protected $mdFile;
 
     public function default_event()
     {
@@ -34,7 +35,9 @@ class MdController extends CustomController
 
         $this->assign('comments_enabled', MdModule::getComments());
 
-        $this->assign('package', MdModule::getPackage());
+        $this->module = $_GET['module'];
+        $this->package = MdModule::getPackage();
+        $this->assign('package', $this->package);
 
         $web_base_arr = explode('/', preg_replace('/^(\/)/', '', $web_file));
         $web_base_arr = array_filter($web_base_arr, function($v, $k) use ($web_base_arr) {
@@ -47,7 +50,9 @@ class MdController extends CustomController
            );
         }, ARRAY_FILTER_USE_BOTH);
         $file = array_pop($web_base_arr);
-        $this->assign('web_base', implode('/', $web_base_arr));;
+        $this->assign('web_base', implode('/', $web_base_arr));
+
+        $this->mdFile = $file;
         $this->assign('md_file', $file);
 
         foreach ($contents as &$item) {
