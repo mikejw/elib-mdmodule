@@ -9,6 +9,7 @@ class MdController extends CustomController
     protected $module;
     protected $package;
     protected $mdFile;
+    protected $webFile;
 
     public function default_event()
     {
@@ -20,6 +21,7 @@ class MdController extends CustomController
         $this->assign('config', MdModule::getConfig());
 
         $web_file = MdModule::getWebFile();
+        $this->webFile = $web_file;
 
         $this->assign('web_file', $web_file);
         $this->assign('index', MdModule::getIndex());
