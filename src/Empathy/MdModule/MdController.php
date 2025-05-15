@@ -10,6 +10,7 @@ class MdController extends CustomController
     protected $package;
     protected $mdFile;
     protected $webFile;
+    protected $docTitle;
 
     public function default_event()
     {
@@ -59,6 +60,9 @@ class MdController extends CustomController
 
         foreach ($contents as &$item) {
             $item['active'] = strpos($item['file'], $file) !== false;
+            if ($item['active']) {
+                $this->docTitle = $item['title'];
+            }
         }
         $this->assign('contents', $contents);
     }
