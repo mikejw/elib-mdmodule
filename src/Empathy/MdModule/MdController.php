@@ -1,7 +1,9 @@
 <?php
 
 namespace Empathy\MdModule;
+
 use Empathy\MVC\Controller\CustomController;
+use Empathy\MVC\DI;
 
 
 class MdController extends CustomController
@@ -18,28 +20,35 @@ class MdController extends CustomController
         $class_arr = explode('\\', get_class($this));
         $class = $class_arr[sizeof($class_arr)-1];
 
-        $this->assign('md', MdModule::init($class));
-        $this->assign('config', MdModule::getConfig());
+        $md = DI::getContainer()->get('MdModule');
 
-        $web_file = MdModule::getWebFile();
+        $this->assign('md', $md->init($class));
+        $this->assign('config', $md->getConfig());
+
+        if (($redirect = $md->getRedirect())) {
+            $this->assign('redirect', $redirect);
+            return true;
+        }
+
+        $web_file = $md->getWebFile();
         $this->webFile = $web_file;
 
         $this->assign('web_file', $web_file);
-        $this->assign('index', MdModule::getIndex());
-        $this->assign('file', MdModule::getFile());
+        $this->assign('index', $md->getIndex());
+        $this->assign('file', $md->getFile());
 
         try {
-            $contents = MdModule::getContents();
+            $contents = $md->getContents();
         } catch(\Exception $e) {
             //
         }
 
-        $this->assign('adoc_mode', MdModule::getAdocMode());
+        $this->assign('adoc_mode', $md->getAdocMode());
 
-        $this->assign('comments_enabled', MdModule::getComments());
+        $this->assign('comments_enabled', $md->getComments());
 
         $this->module = $_GET['module'];
-        $this->package = MdModule::getPackage();
+        $this->package = $md->getPackage();
         $this->assign('package', $this->package);
 
         $web_base_arr = explode('/', preg_replace('/^(\/)/', '', $web_file));
